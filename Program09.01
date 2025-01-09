@@ -1,0 +1,20 @@
+﻿namespace ConsoleApp23
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, World!");
+        }
+    }
+}
+
+
+// usunacz klucz dictionary.Remove("Marta");
+//ConatainsValues sprawdzic wartosc klucza
+//var keys = dicitonary.Keys.ToList(); - klucz lista
+// File.WriteAllText("plik.txt", "Hello world!"); - plik.txt to jest plik w ktorym bedzie wpisany nasz text, a "Hello world!" bedzie wpisany w pliku
+// string content - File.ReadAllText("plik.txt") - sczyta caly plik 
+// File.AppendAllText("plik.txt", "\nNowa Linia"); - dodaje nowa linija i (\n) przesuwa text na linije nizej
+//string[] sentences = line.split(`.`); - rodzielic zdania za pomoca kropki
+//
