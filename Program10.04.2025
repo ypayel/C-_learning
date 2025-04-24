@@ -1,0 +1,263 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+// === KLASA ORGANIZMU ===
+//Zadanie 1
+//abstract class Organism
+//{
+//    public string Name { get; set; }
+//    public int Energy { get; set; }
+
+//    protected Organism(string name, int energy)
+//    {
+//        Name = name;
+//        Energy = energy;
+//    }
+
+//    public abstract void Act();
+//}
+
+//// === ORGANIZMY ===
+//class Plant : Organism
+//{
+//    public Plant(string name) : base(name, 10) { }
+
+//    public override void Act()
+//    {
+//        Energy += 1;
+//        Console.WriteLine($"{Name} rośnie (energia: {Energy})");
+//    }
+//}
+
+//class Fungus : Organism
+//{
+//    public Fungus(string name) : base(name, 5) { }
+
+//    public override void Act()
+//    {
+//        Energy += 1;
+//        Console.WriteLine($"{Name} rozkłada szczątki (energia: {Energy})");
+//    }
+//}
+
+//class Animal : Organism, IPredator, ISymbiotic
+//{
+//    public Animal(string name) : base(name, 20) { }
+
+//    public override void Act()
+//    {
+//        Energy -= 1;
+//        Console.WriteLine($"{Name} czeka na okazję (energia: {Energy})");
+//    }
+
+//    public void Hunt(Organism prey)
+//    {
+//        if (prey.Energy > 0)
+//        {
+//            Energy += prey.Energy;
+//            prey.Energy = 0;
+//            Console.WriteLine($"{Name} zjada {prey.Name} (energia: {Energy})");
+//        }
+//    }
+
+//    public void Cooperate(Organism partner)
+//    {
+//        Energy += 1;
+//        partner.Energy += 1;
+//        Console.WriteLine($"{Name} współpracuje z {partner.Name} (energia: {Energy})");
+//    }
+//}
+
+//// === INTERFEJSY ===
+//interface IPredator
+//{
+//    void Hunt(Organism prey);
+//}
+
+//interface ISymbiotic
+//{
+//    void Cooperate(Organism partner);
+//}
+
+//// === PROGRAM ===
+//class Program
+//{
+//    static void Main()
+//    {
+//        // Tworzymy organizmy
+//        var roslina = new Plant("Kwiat");
+//        var grzyb = new Fungus("Grzyb");
+//        var zwierze = new Animal("Zając");
+
+//        // Lista do symulacji
+//        List<Organism> ekosystem = new() { roslina, grzyb, zwierze };
+
+//        Console.WriteLine("=== Krok 1 ===");
+//        foreach (var o in ekosystem)
+//            o.Act();
+
+//        zwierze.Hunt(grzyb);
+//        zwierze.Cooperate(roslina);
+
+//        Console.WriteLine("\n=== Krok 2 ===");
+//        foreach (var o in ekosystem)
+//            o.Act();
+
+//        // Serializacja do pliku
+//        string json = JsonSerializer.Serialize(ekosystem, new JsonSerializerOptions { WriteIndented = true });
+//        File.WriteAllText("ekosystem.json", json);
+//        Console.WriteLine("\nStan ekosystemu zapisany do pliku 'ekosystem.json'");
+//    }
+//}
+
+
+//Zadanie 2
+
+
+
+
+
+// Interfejsy
+public interface IContent
+{
+    string Title { get; }
+    string Genre { get; }
+    string GetContentType();
+}
+
+public interface IRecommendationAlgorithm
+{
+    List<IContent> Recommend(List<IContent> contents, User user);
+}
+
+// Klasy treści
+public abstract class ContentBase : IContent
+{
+    public string Title { get; set; }
+    public string Genre { get; set; }
+
+    public ContentBase(string title, string genre)
+    {
+        Title = title;
+        Genre = genre;
+    }
+
+    public abstract string GetContentType();
+}
+
+public class Movie : ContentBase
+{
+    public Movie(string title, string genre) : base(title, genre) { }
+    public override string GetContentType() => "Movie";
+}
+
+public class Series : ContentBase
+{
+    public Series(string title, string genre) : base(title, genre) { }
+    public override string GetContentType() => "Series";
+}
+
+public class Documentary : ContentBase
+{
+    public Documentary(string title, string genre) : base(title, genre) { }
+    public override string GetContentType() => "Documentary";
+}
+
+// Algorytmy rekomendacji
+public class CollaborativeFiltering : IRecommendationAlgorithm
+{
+    public List<IContent> Recommend(List<IContent> contents, User user)
+    {
+        return contents.OrderBy(c => Guid.NewGuid()).Take(3).ToList();
+    }
+}
+
+public class ContentBasedFiltering : IRecommendationAlgorithm
+{
+    public List<IContent> Recommend(List<IContent> contents, User user)
+    {
+        return contents.Where(c => user.PreferredGenres.Contains(c.Genre)).Take(3).ToList();
+    }
+}
+
+public class TrendBasedFiltering : IRecommendationAlgorithm
+{
+    public List<IContent> Recommend(List<IContent> contents, User user)
+    {
+        var trendingGenre = contents.GroupBy(c => c.Genre)
+                                    .OrderByDescending(g => g.Count())
+                                    .First().Key;
+
+        return contents.Where(c => c.Genre == trendingGenre).Take(3).ToList();
+    }
+}
+
+// Użytkownik
+[Serializable]
+public class User
+{
+    public string Name { get; set; }
+    public List<string> PreferredGenres { get; set; } = new List<string>();
+}
+
+// Serializacja użytkownika
+public static class UserPreferencesSerializer
+{
+    public static void SaveUser(User user, string filePath)
+    {
+        var json = JsonSerializer.Serialize(user);
+        File.WriteAllText(filePath, json);
+    }
+
+    public static User LoadUser(string filePath)
+    {
+        var json = File.ReadAllText(filePath);
+        return JsonSerializer.Deserialize<User>(json);
+    }
+}
+
+// Program główny
+class Program
+{
+    static void Main()
+    {
+        var contents = new List<IContent>
+        {
+            new Movie("Inception", "Sci-Fi"),
+            new Series("Breaking Bad", "Drama"),
+            new Documentary("Planet Earth", "Nature"),
+            new Movie("Avengers", "Action"),
+            new Series("Dark", "Sci-Fi"),
+            new Documentary("The Last Dance", "Sports")
+        };
+
+        var user = new User
+        {
+            Name = "Anna",
+            PreferredGenres = new List<string> { "Sci-Fi", "Drama" }
+        };
+
+        // Zapis preferencji
+        string path = "user.json";
+        UserPreferencesSerializer.SaveUser(user, path);
+
+        // Wczytanie preferencji
+        var loadedUser = UserPreferencesSerializer.LoadUser(path);
+
+        // Wybór algorytmu
+        IRecommendationAlgorithm algorithm = new ContentBasedFiltering();
+
+        // Rekomendacje
+        var recommendations = algorithm.Recommend(contents, loadedUser);
+
+        Console.WriteLine($"Rekomendacje dla użytkownika {loadedUser.Name}:");
+        foreach (var c in recommendations)
+        {
+            Console.WriteLine($"- {c.Title} ({c.GetContentType()}, {c.Genre})");
+        }
+    }
+}
+
+
