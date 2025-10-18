@@ -11,7 +11,6 @@ In this project i start learning C#, there u will find my exercises, notes, some
 ## 🧱 Technologies Used
 
 - **C#** - main language
-
 ---
 
 👤 Author
