@@ -1,0 +1,104 @@
+﻿using System;
+using System.Collections.Generic;
+
+class Knapsack01
+{
+    // Struktura przechowująca wagi i wartości
+    public struct Item
+    {
+        public int w;
+        public int b;
+        public Item(int weight, int value)
+        {
+            w = weight;
+            b = value;
+        }
+    }
+
+    // Algorytm plecakowy 0-1 (dynamiczny)
+    public static (int, List<int>) SolveKnapsack(List<Item> items, int W)
+    {
+        int n = items.Count;
+        int[,] B = new int[n + 1, W + 1];
+
+        // Wypełnianie tablicy DP
+        for (int i = 1; i <= n; i++)
+        {
+            for (int w = 0; w <= W; w++)
+            {
+                if (items[i - 1].w > w)
+                {
+                    B[i, w] = B[i - 1, w];
+                }
+                else
+                {
+                    B[i, w] = Math.Max(
+                        B[i - 1, w],
+                        items[i - 1].b + B[i - 1, w - items[i - 1].w]
+                    );
+                }
+            }
+        }
+
+        
+        List<int> chosen = new List<int>();
+        int cw = W;
+
+        for (int i = n; i > 0; i--)
+        {
+            if (B[i, cw] != B[i - 1, cw])
+            {
+                // Przedmiot został wybrany
+                chosen.Add(i);
+                cw -= items[i - 1].w;
+            }
+        }
+
+        chosen.Reverse();
+
+        return (B[n, W], chosen);
+    }
+
+    static void Main()
+    {
+      
+        // 1 
+        var items1 = new List<Item>()
+        {
+            new Item(2,3),
+            new Item(3,4),
+            new Item(4,5),
+            new Item(5,6)
+        };
+
+        int W1 = 5;
+        var result1 = SolveKnapsack(items1, W1);
+
+        Console.WriteLine("ZESTAW 1:");
+        Console.WriteLine("b_max = " + result1.Item1);
+        Console.WriteLine("Wybrane przedmioty: " + string.Join(", ", result1.Item2));
+
+        Console.WriteLine("Oczekiwane: b_max = 7, przedmioty: 1, 2\n");
+
+
+       // 2
+
+        var items2 = new List<Item>()
+        {
+            new Item(2,3),
+            new Item(3,4),
+            new Item(4,5),
+            new Item(5,6),
+            new Item(6,7)
+        };
+
+        int W2 = 7;
+        var result2 = SolveKnapsack(items2, W2);
+
+        Console.WriteLine("ZESTAW 2:");
+        Console.WriteLine("b_max = " + result2.Item1);
+        Console.WriteLine("Wybrane przedmioty: " + string.Join(", ", result2.Item2));
+
+        Console.WriteLine("Oczekiwane: b_max = 9, przedmioty: 2, 3\n");
+    }
+}
